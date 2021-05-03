@@ -1,0 +1,7 @@
+version: "3.8"
+services:
+  menu:
+    build: .
+    ports:
+      - "2227"
+    env_file: env
