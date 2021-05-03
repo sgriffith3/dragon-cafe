@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   menu:
-    build: .
+    image: python3.8-slim
     ports:
       - "2227"
     env_file: env
