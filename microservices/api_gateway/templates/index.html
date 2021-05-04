@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Cafe</title>
+</head>
+<style>
+body {
+        background-image: linear-gradient(to bottom right, red, yellow);
+}
+.navtop {
+        column-count: 2;
+        column-width: "45%";
+}
+.column {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+}
+.header {
+  padding: 15px;
+  text-align: center;
+  font-size: 35px;
+}
+</style>
+<body>
+    <div class="header">
+            <h1>Dragon Cafe</h1>
+    </div>
+    <div class="navtop">
+            <div class="column">
+                <h2>Login Service</h2>
+                <iframe src="/login" title="Login Here" width="90%" style="border:10px solid green">
+                </iframe>
+            </div>
+            <div class="column">
+                <h2>Fortune Cookie Service</h2>
+                <iframe src="/fortune_cookie" title="Crack you cookies!" width="90%" style="border:10px solid blue">
+                </iframe>
+            </div>
+    </div>
+    <div class="column" style="padding-left:40px;padding-right:40px;">
+        <h2>Menu Service</h2>
+        <iframe src="/menu" title="Check out our food!" width="100%" style="border:10px solid purple">
+        </iframe>
+    </div>
+</body>
+</html>

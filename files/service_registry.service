@@ -1,0 +1,16 @@
+[Unit]
+Description=Dragon Cafe Service Registry
+
+[Service]
+User=root
+Group=root
+
+WorkingDirectory=/home/student/dragon-cafe
+ExecStart=/home/student/dragon-cafe/venv/bin/python3 service_registry.py
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=dragon-cafe-sr
+
+[Install]
+WantedBy=multi-user.target
