@@ -16,6 +16,7 @@ import random
 import requests
 import socket
 import os
+import json
 
 HOST = os.getenv("API_HOST", "0.0.0.0")
 LOCAL_IP = socket.gethostbyname(socket.gethostname())
@@ -23,8 +24,6 @@ PORT = os.getenv("API_PORT", 2225)
 REG_ADDR = os.getenv("SR_ADDRESS", "127.0.0.1")
 REG_PORT = os.getenv("SR_PORT", 55555)
 SERVICE = os.path.basename(__file__).rstrip(".py")
-DRAGON_CAFE = os.getenv("DRAGON_CAFE", "v2.dragon-cafe.com")
-
 
 class Page:
     def __init__(self, filename, templates_dir=Path("templates"), args={}, cookies={}):
@@ -52,41 +51,26 @@ def routes(app: web.Application) -> None:
     app.add_routes(
         [
             web.get("/", home),
-            web.get("/login", login_v2),
-            web.get("/login/{ex_path}", login_v2),
-            web.post("/login/{ex_path}", login_v2),
-            web.get("/fortune_cookie", fortune_cookie_v2),
-            web.get("/fortune_cookie/{ex_path}", fortune_cookie_v2),
-            web.get("/menu", menu_v2)
+            web.get("/{service_name}", service),
+            web.get("/{service_name}/{ex_path}", service),
+            web.post("/{service_name}/{ex_path}", service),
         ]
     )
 
-async def login_v2(request) -> web.Response:
+
+async def service(request) -> web.Response:
     print(request)
+    svc_name = request.match_info.get('service_name', '')
     ex_path = request.match_info.get('ex_path', '')
+    svc_host = requests.get(f"http://{REG_ADDR}:{REG_PORT}/get_one/{svc_name}").text
+    svc_host = json.loads(svc_host)
+    svc_ip = svc_host["endpoints"][0]
+    svc_port = svc_host["endpoints"][1]
     if request.method == "POST":
         data = await request.post()
-        name = data['name']
-        r = requests.post(f"http://{DRAGON_CAFE}/login/{ex_path}", data=data)
+        r = requests.post(f"http://{svc_ip}:{svc_port}/{ex_path}", data=data)
     else:
-        if ex_path == '':
-            r = requests.get(f"http://{DRAGON_CAFE}/login")
-        else:
-            r = requests.get(f"http://{DRAGON_CAFE}/login/{ex_path}")
-    return web.Response(text=r.text, content_type='text/html')
-
-async def fortune_cookie_v2(request) -> web.Response:
-    print(request)
-    ex_path = request.match_info.get('ex_path', '')
-    if ex_path == '':
-        r = requests.get(f"http://{DRAGON_CAFE}/fortune_cookie")
-    else:
-        r = requests.get(f"http://{DRAGON_CAFE}/fortune_cookie/{ex_path}")
-    return web.Response(text=r.text, content_type='text/html')
-
-async def menu_v2(request):
-    print(request)
-    r = requests.get(f"http://{DRAGON_CAFE}/menu")
+        r = requests.get(f"http://{svc_ip}:{svc_port}/{ex_path}")
     return web.Response(text=r.text, content_type='text/html')
 
 

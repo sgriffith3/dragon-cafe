@@ -17,6 +17,7 @@ import random
 import requests
 import socket
 import os
+import json
 
 HOST = os.getenv("DRAGON_HOST", "0.0.0.0")
 LOCAL_IP = socket.gethostbyname(socket.gethostname())
@@ -68,26 +69,44 @@ def routes(app: web.Application) -> None:
 async def login_v2(request) -> web.Response:
     print(request)
     ex_path = request.match_info.get('ex_path', '')
+    login_svc = requests.get("http://127.0.0.1:55555/get_one/login").text
+    print(login_svc)
+    login_host = json.loads(login_svc)
+    login_ip = login_host['endpoints'][0]
+    login_port = login_host['endpoints'][1]
+    if request.method == "POST":
+        data = await request.post()
+        r = requests.post(f"http://{login_ip}:{login_port}/login/{ex_path}", data=data)
     if ex_path == '':
-        r = requests.get("http://v2.dragon-cafe.com/login")
+        r = requests.get(f"http://{login_ip}:{login_port}/login")
     else:
-        r = requests.get(f"http://v2.dragon-cafe.com/login/{ex_path}")
+        r = requests.get(f"http://{login_ip}:{login_port}/login/{ex_path}")
     return web.Response(text=r.text, content_type='text/html')
 
 
 async def fortune_cookie_v2(request) -> web.Response:
     print(request)
     ex_path = request.match_info.get('ex_path', '')
+    fortune_cookie_svc = requests.get("http://127.0.0.1:55555/get_one/fortune_cookie").text
+    print(fortune_cookie_svc)
+    fortune_cookie_host = json.loads(fortune_cookie_svc)
+    fortune_cookie_ip = fortune_cookie_host['endpoints'][0]
+    fortune_cookie_port = fortune_cookie_host['endpoints'][1]
     if ex_path == '':
-        r = requests.get("http://v2.dragon-cafe.com/fortune_cookie")
+        r = requests.get(f"http://{fortune_cookie_ip}:{fortune_cookie_port}/fortune_cookie")
     else:
-        r = requests.get(f"http://v2.dragon-cafe.com/fortune_cookie/{ex_path}")
+        r = requests.get(f"http://{fortune_cookie_ip}:{fortune_cookie_port}/fortune_cookie/{ex_path}")
     return web.Response(text=r.text, content_type='text/html')
 
 
 async def menu_v2(request):
     print(request)
-    r = requests.get("http://v2.dragon-cafe.com/menu")
+    menu_svc = requests.get("http://127.0.0.1:55555/get_one/menu").text
+    print(menu_svc)
+    menu_host = json.loads(menu_svc)
+    menu_ip = menu_host['endpoints'][0]
+    menu_port = menu_host['endpoints'][1]
+    r = requests.get(f"http://{menu_ip}:{menu_port}/menu")
     return web.Response(text=r.text, content_type='text/html')
 
 
