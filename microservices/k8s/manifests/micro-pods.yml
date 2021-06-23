@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:   
+  name: menu
+  labels:
+    dragon: menu
+spec:
+  containers:
+  - image: node.registry/menu
+    name: menu
+    ports:
+    - containerPort: 2227
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: login
+  labels:
+    dragon: login
+spec:
+  containers:
+  - image: node.registry/login
+    name: login
+    ports:
+    - containerPort: 2228
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fortune
+  labels:
+    dragon: fortune
+spec:
+  containers:
+  - image: node.registry/fortune_cookie
+    name: fortune
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 2229
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: api-gateway
+ labels:
+   dragon: api-gateway
+spec:
+ containers:
+ - image: node.registry/api_gateway
+   name: api-gateway
+   ports:
+   - containerPort: 80

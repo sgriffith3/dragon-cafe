@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dragon Cafe | Menu</title>
+</head>
+<body>
+<h1>What would you like?</h1>
+{% for food in foods %}
+<li><strong>{{ food.item }}</strong> - {{ food.description }} - {{ food.price }}</li>
+{% endfor %}
+</body>
+</html>
