@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  api_gateway:
+    image: api_gateway
+    env_file:
+    - dragon.env
+    environment:
+      SR_ADDRESS: 172.19.238.10
+    networks:
+      app_net:
+        ipv4_address: 172.19.238.9
+  fortune_cookie:
+    image: fortune_cookie
+    env_file:
+    - dragon.env
+    environment:
+      SR_ADDRESS: 172.19.238.10
+    networks:
+      app_net:
+  login:
+    image: login
+    env_file:
+    - dragon.env
+    environment:
+      SR_ADDRESS: 172.19.238.10
+    networks:
+      app_net:
+  menu:
+    image: menu
+    env_file:
+    - dragon.env
+    environment:
+      SR_ADDRESS: 172.19.238.10
+    networks:
+      app_net:
+  service_registry:
+    image: service_registry
+    networks:
+      app_net:
+        ipv4_address: 172.19.238.10
+networks:
+  app_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.19.238.0/24"

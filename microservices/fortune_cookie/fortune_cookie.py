@@ -6,22 +6,28 @@ Dragon Cafe Fortune Cookie Microservice | Author: Sam Griffith | Org: Alta3 Rese
 This Fortune Cookie Microservice is the third part of the monolithic application of a Chinese Restaurant website that has been broken out into it's own service.
 """
 
-from aiohttp import web
-import jinja2
+# Standard Library Imports
+import json
+import os
 from pathlib import Path
 import random
-import requests
 import socket
-import os
 
+# 3rd Party Packages
+from aiohttp import web
+import jinja2
+import requests
+
+# Environmental Variables
 HOST = os.getenv("FORTUNE_HOST", "0.0.0.0")
 LOCAL_IP = socket.gethostbyname(socket.gethostname())
-PORT = os.getenv("FORTUNE_PORT", 2229)
+PORT = os.getenv("FTN_PORT", 2229)
 REG_ADDR = os.getenv("SR_ADDRESS", "127.0.0.1")
 REG_PORT = os.getenv("SR_PORT", 55555)
 SERVICE = os.path.basename(__file__).rstrip(".py")
 
 
+# Establish a new object type, called a Page
 class Page:
     def __init__(self, filename, templates_dir=Path("templates"), args={}, cookies={}):
         """
@@ -34,19 +40,29 @@ class Page:
         self.cookies = cookies
 
     def render(self):
+        """ Template in a Jinja2 formatted HTML file and return a web.Response"""
         with open(self.file) as f:
             txt = f.read()
             print(f"Templating in {self.args}")
+            # Fill in the template file with any args provided
             j2 = jinja2.Template(txt).render(self.args)
+            # Create a response object
             resp = web.Response(text=j2, content_type='text/html')
+            # Add any cookies passed to this page as cookies in the response
             for c, j in self.cookies:
                 resp.set_cookie(c, j)
+            # feed back the web.Response object with the filled out page
             return resp
 
 
 def routes(app: web.Application) -> None:
+    """
+    Add paths as available routes and specify which function gets called
+    when a path is requested.
+    """
     app.add_routes(
         [
+            # web.get == HTTP GET
             web.get("/", fortune_cookie),
             web.get("/fortune_cookie", fortune_cookie),
             web.get("/fortune_cookie/fortune", fortune),
@@ -62,7 +78,9 @@ async def fortune_cookie(request) -> web.Response:
     Click on the link provided to retrieve your fortune!
     """
     print(request)
+    # Create a page from the fortune_cookie.html template
     page = Page(filename="fortune_cookie.html")
+    # Render and return the page
     return page.render()
 
 
@@ -71,6 +89,7 @@ async def fortune(request) -> web.Response:
     This returns a randomly picked aphorism as a part of the fortune_cookie service.
     """
     print(request)
+    # Long list of possible amorphisms (fortunes)
     possible = [
         "People are naturally attracted to you.",
         "You learn from your mistakes... You will learn a lot today.",
@@ -110,7 +129,7 @@ async def fortune(request) -> web.Response:
         "You will travel to many exotic places in your lifetime.",
         "Your ability for accomplishment will follow with success.",
         "Nothing astonishes men so much as common sense and plain dealing.",
-        "Its amazing how much good you can do if you dont care who gets the credit.",
+        "Its amazing how much good you can do if you do not care who gets the credit.",
         "Everyone agrees. You are the best.",
         "Life consist not in holding good cards, but in playing those you hold well.",
         "Jealousy doesn't open doors, it closes them!",
@@ -123,12 +142,19 @@ async def fortune(request) -> web.Response:
         "Joys are often the shadows, cast by sorrows.",
         "Fortune favors the brave.",
     ]
+    # Select one of the fortunes at random
     fortune_choice = random.choice(possible)
+    # Set a key-value pair to pass as args into the template
     args = {"fortune": fortune_choice}
+    # Create a page from the fortune.html template
     page = Page(filename="fortune.html", args=args)
+    # Render and return the page
     return page.render()
 
+
 async def register(add_to_registry=True):
+    """ Send an HTTP GET to the Service Registry /add path with service info """
+    # debug info
     print(f"""
     Service Registry {REG_ADDR}:{REG_PORT}
 
@@ -138,12 +164,15 @@ async def register(add_to_registry=True):
     service IP       {LOCAL_IP}
     service port     {PORT}
     """)
+    # A parameter is needed for the async call on this function. So we might as well use it!
     if add_to_registry:
         r = requests.get(f"http://{REG_ADDR}:{REG_PORT}/add/{SERVICE}/{LOCAL_IP}/{PORT}")
         print(r.status_code, r.text)
 
 
 async def unregister(remove_from_registry=True):
+    """
+    Send an HTTP GET to the Service Registry /remove path with service info """
     if remove_from_registry:
         r = requests.get(f"http://{REG_ADDR}:{REG_PORT}/remove/{SERVICE}/{LOCAL_IP}/{PORT}")
         print(r.status_code)
@@ -160,12 +189,18 @@ def main():
     """
 
     print("This aiohttp web server is starting up!")
+    # Create a web.Application object
     app = web.Application()
+    # Add the available routes to our web application
     routes(app)
+    # Have the register function be scheduled to run prior to the webserver being initiated
     app.on_startup.append(register)
+    # Have the unregister function be scheduled to run as the webserver is being shutdown
     app.on_shutdown.append(unregister)
+    # Start the webserver
     web.run_app(app, host=HOST, port=PORT)
 
 
+# Only run the main() function if this script gets called directly from CLI
 if __name__ == "__main__":
     main()

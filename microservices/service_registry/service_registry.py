@@ -4,7 +4,6 @@ from aiohttp import web
 import os
 import aiosqlite
 import datetime
-import sqlite3
 import random
 import subprocess
 import jinja2
@@ -44,7 +43,7 @@ async def add_service(request):
             await db.execute(sql2)
             await db.commit()
             txt = ""
-        except sqlite3.IntegrityError as err:
+        except aiosqlite.IntegrityError as err:
             txt = f"{service} service already exists"
     return web.Response(text=txt)
 

@@ -62,7 +62,7 @@ def routes(app: web.Application) -> None:
 
 async def menu_v2(request) -> web.Response:
     print(request)
-    menu_svc = requests.get("http://127.0.0.1:55555/get_one/menu").text
+    menu_svc = requests.get(f"http://{REG_ADDR}:{REG_PORT}/get_one/menu").text
     print(menu_svc)
     menu_host = json.loads(menu_svc)
     menu_ip = menu_host['endpoints'][0]
@@ -178,7 +178,7 @@ async def fortune_cookie(request) -> web.Response:
     ]
     fortune = random.choice(possible)
     args = {"fortune": fortune}
-    page = Page(filename="seer.html", args=args)
+    page = Page(filename="fortune.html", args=args)
     return page.render()
 
 
